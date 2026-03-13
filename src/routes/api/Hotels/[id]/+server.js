@@ -51,3 +51,22 @@ export async function PUT({ params, request }) {
 
     return Response.json({ message: 'Hotel updated' }, { status: 200 });
 }
+
+export async function DELETE({ params, request }) {
+    if (!checkAuth(request)) {
+        return Response.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { id } = params;
+
+    const [result] = await pool.query(
+        'DELETE FROM hotels WHERE id = ?',
+        [id]
+    );
+
+    if (result.affectedRows === 0) {
+        return Response.json({ message: 'Hotel not found' }, { status: 404 });
+    }
+
+    return new Response(null, { status: 204 });
+}
