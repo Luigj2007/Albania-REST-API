@@ -27,3 +27,27 @@ export async function GET({ params }) {
 
     return Response.json(rows[0], { status: 200 });
 }
+
+export async function PUT({ params, request }) {
+    if (!checkAuth(request)) {
+        return Response.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { id } = params;
+    const { name, stars, price_range, location } = await request.json();
+
+    if (!name || !stars || !price_range || !location) {
+        return Response.json({ message: 'Missing required fields' }, { status: 400 });
+    }
+
+    const [result] = await pool.query(
+        'UPDATE hotels SET name = ?, stars = ?, price_range = ?, location = ? WHERE id = ?',
+        [name, stars, price_range, location, id]
+    );
+
+    if (result.affectedRows === 0) {
+        return Response.json({ message: 'Hotel not found' }, { status: 404 });
+    }
+
+    return Response.json({ message: 'Hotel updated' }, { status: 200 });
+}
